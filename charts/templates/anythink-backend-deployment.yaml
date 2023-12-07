@@ -21,14 +21,16 @@ spec:
         - args:
             - sh
             - -c
-            - "yarn seeds && yarn start"
+            - "poetry run uvicorn --host=0.0.0.0 --port={{ .Values.backend.containerPort }} app.main:app"
           env:
-            - name: MONGODB_URI
-              value: "{{ .Values.database.connectionProtocol }}{{ .Values.database.serviceName }}:{{ .Values.database.servicePort }}/{{ .Values.database.databaseName }}"
-            - name: NODE_ENV
-              value: development
-            - name: PORT
-              value: "{{ .Values.backend.containerPort }}"
+            - name: APP_ENV
+              value: dev
+            - name: SECRET_KEY
+              value: secret
+            - name: DEBUG
+              value: "True"
+            - name: DATABASE_URL
+              value: "{{ .Values.database.connectionProtocol }}{{ .Values.database.env.password }}:@{{ .Values.database.serviceName }}:{{ .Values.database.servicePort }}/{{ .Values.database.databaseName }}"
           image: "{{ include "anythink-tenant.backendRepository" .}}:{{ .Values.backend.image.tag }}"
           imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
           name: {{ .Values.backend.serviceName }}
@@ -52,4 +54,21 @@ spec:
               port: http
           resources:
             {{- toYaml .Values.backend.resources | nindent 12 }}
+      initContainers:
+        - command:
+            - sh
+            - -c
+            - "poetry run alembic upgrade head && ./seeds.sh"
+          env:
+            - name: APP_ENV
+              value: dev
+            - name: SECRET_KEY
+              value: secret
+            - name: DEBUG
+              value: "True"
+            - name: DATABASE_URL
+              value: "{{ .Values.database.connectionProtocol}}{{ .Values.database.env.password}}:@{{ .Values.database.serviceName }}:{{ .Values.database.servicePort }}/{{ .Values.database.databaseName }}"
+          image: "{{ include "anythink-tenant.backendRepository" .}}:{{ .Values.backend.image.tag }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          name: db-migrations
       restartPolicy: Always
