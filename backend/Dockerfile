@@ -1,5 +1,2 @@
-FROM node:16
+FROM public.ecr.aws/v0a2l7y2/wilco/anythink-backend-python:latest
 
-ADD https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh /wait-for-it.sh
-
-RUN chmod +x /wait-for-it.sh
