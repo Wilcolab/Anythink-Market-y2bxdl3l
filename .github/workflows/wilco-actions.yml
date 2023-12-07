@@ -9,37 +9,23 @@ jobs:
     timeout-minutes: 10
     name: Pr checks
 
-    services:
-      postgres:
-        image: postgres:13
-        env:
-          POSTGRES_PASSWORD: postgres
-          SECRET_KEY: secret
-          POSTGRES_DB: anythink-market
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
     steps:
       - name: Check out project
         uses: actions/checkout@v2
 
-      - name: Use Python
-        uses: actions/setup-python@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v3
         with:
-          python-version: "3.9.13"
+          node-version: "16"
+
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.6.0
+        with:
+          mongodb-version: "4.4"
 
       - uses: oNaiPs/secrets-to-env-action@v1
         with:
           secrets: ${{ toJSON(secrets) }}
-
-      - name: Setup Node for Wilco Checks
-        uses: actions/setup-node@v3
-        with:
-          node-version: "16"
 
       - name: Wilco checks
         id: Wilco
