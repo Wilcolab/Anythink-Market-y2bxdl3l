@@ -1,3 +1,3 @@
 #!/bin/sh
 
-yarn seeds
+python3 ./app/db/seeds.py
